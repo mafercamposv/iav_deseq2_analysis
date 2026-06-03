@@ -1,4 +1,18 @@
 def load_deseq2_results(filename):
+    """Read a DESeq2 result file and return valid gene records.
+
+    Args:
+        filename (str): Path to the DESeq2 TSV file.
+
+    Returns:
+        list[tuple[str, float, float]]: A list of tuples with gene name,
+            log2 fold change, and adjusted p-value (padj).
+
+    Notes:
+        The function detects the columns `log2FoldChange` and `padj` from the
+        header. If the header does not include those columns, it uses the
+        second and third columns by default.
+    """
     valid_genes = []
     with open(filename, "r") as file:
         header = file.readline().strip()  # Leer el encabezado
@@ -37,6 +51,17 @@ def load_deseq2_results(filename):
 
 
 def is_significant(log2_fold_change, padj, lfc_threshold, padj_threshold):
+    """Determine whether a gene passes significance thresholds.
+
+    Args:
+        log2_fold_change (float): Log2 fold change for the gene.
+        padj (float): Adjusted p-value for the gene.
+        lfc_threshold (float): Minimum absolute log2 fold change required.
+        padj_threshold (float): Maximum adjusted p-value allowed.
+
+    Returns:
+        bool: True if the gene is significant, otherwise False.
+    """
     if padj < padj_threshold and abs(log2_fold_change) >= lfc_threshold:
         return True
     else:
@@ -47,6 +72,15 @@ def is_significant(log2_fold_change, padj, lfc_threshold, padj_threshold):
 
 
 def classify_gene(log2_fold_change):
+    """Classify a gene as upregulated or downregulated.
+
+    Args:
+        log2_fold_change (float): Log2 fold change for the gene.
+
+    Returns:
+        str: "upregulated" if positive, "downregulated" if negative,
+            or "not significant" if zero.
+    """
     if log2_fold_change > 0:
         return "upregulated"
     elif log2_fold_change < 0:
@@ -59,6 +93,18 @@ def classify_gene(log2_fold_change):
 
 
 def filter_genes(results, lfc_threshold, padj_threshold):
+    """Filter DESeq2 gene records by significance and classify them.
+
+    Args:
+        results (list[tuple[str, float, float]]): Gene records with name,
+            log2 fold change, and adjusted p-value.
+        lfc_threshold (float): Minimum absolute log2 fold change required.
+        padj_threshold (float): Maximum adjusted p-value allowed.
+
+    Returns:
+        list[tuple[str, float, float, str]]: Filtered gene records including
+            classification labels.
+    """
     filtered_genes = []
     for gene_name, log2_fold_change, padj in results:
         if is_significant(log2_fold_change, padj, lfc_threshold, padj_threshold):
@@ -71,6 +117,13 @@ def filter_genes(results, lfc_threshold, padj_threshold):
 
 
 def write_results(output_file, filtered_genes):
+    """Write filtered gene records to an output TSV file.
+
+    Args:
+        output_file (str): Path to the output TSV file.
+        filtered_genes (list[tuple[str, float, float, str]]): Filtered gene
+            records with classification.
+    """
     with open(output_file, "w") as file:
         file.write(
             "Gene\tLog2FoldChange\tpadj\tClassification\n"
@@ -85,6 +138,12 @@ def write_results(output_file, filtered_genes):
 
 
 def print_summary(filtered_genes):
+    """Print a summary of filtered gene classifications.
+
+    Args:
+        filtered_genes (list[tuple[str, float, float, str]]): Filtered gene
+            records with classification.
+    """
     total_genes = len(filtered_genes)
     upregulated_genes = sum(1 for gene in filtered_genes if gene[3] == "upregulated")
     downregulated_genes = sum(
@@ -99,6 +158,11 @@ def print_summary(filtered_genes):
 
 
 def main():
+    """Parse arguments and run the DESeq2 analysis pipeline.
+
+    This is the program entry point. It loads input data, filters genes,
+    writes results to a file, and prints a summary.
+    """
     import argparse
 
     parser = argparse.ArgumentParser(description="Analyze DESeq2 results")
