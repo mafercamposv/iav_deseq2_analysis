@@ -19,3 +19,13 @@ def load_deseq2_results(filename):
 
 
 # Responsabilidad: Cargar los resultados de DESeq2 desde un archivo y devolver una lista de genes válidos con sus estadísticas.
+
+
+def is_significant(log2_fold_change, padj, lfc_threshold, padj_threshold):
+    if padj < padj_threshold and abs(log2_fold_change) >= lfc_threshold:
+        return True
+    else:
+        return False
+
+
+# Responsabilidad: Determinar si un gen es significativamente diferencialmente expresado según los umbrales de log2 fold change y p-valor ajustado.
