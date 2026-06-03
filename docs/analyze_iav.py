@@ -29,3 +29,15 @@ def is_significant(log2_fold_change, padj, lfc_threshold, padj_threshold):
 
 
 # Responsabilidad: Determinar si un gen es significativamente diferencialmente expresado según los umbrales de log2 fold change y p-valor ajustado.
+
+
+def classify_gene(log2_fold_change):
+    if log2_fold_change > 0:
+        return "upregulated"
+    elif log2_fold_change < 0:
+        return "downregulated"
+    else:
+        return "not significant"
+
+
+# Responsabilidad: Clasificar un gen como "upregulated", "downregulated" o "not significant" según su log2 fold change.
