@@ -41,3 +41,17 @@ def classify_gene(log2_fold_change):
 
 
 # Responsabilidad: Clasificar un gen como "upregulated", "downregulated" o "not significant" según su log2 fold change.
+
+
+def filter_genes(results, lfc_threshold, padj_threshold):
+    filtered_genes = []
+    for gene_name, log2_fold_change, p_value in results:
+        if is_significant(log2_fold_change, p_value, lfc_threshold, padj_threshold):
+            classification = classify_gene(log2_fold_change)
+            filtered_genes.append(
+                (gene_name, log2_fold_change, p_value, classification)
+            )
+    return filtered_genes
+
+
+# Responsabilidad: Filtrar los genes significativos y clasificarlos según su log2 fold change, devolviendo una lista de genes con su clasificación.
