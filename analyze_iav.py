@@ -1,24 +1,39 @@
 def load_deseq2_results(filename):
     valid_genes = []
     with open(filename, "r") as file:
-        header = file.readline()  # Leer el encabezado
+        header = file.readline().strip()  # Leer el encabezado
+        header_columns = header.split("\t")
+        header_lower = [column.lower() for column in header_columns]
+
+        try:
+            lfc_index = header_lower.index("log2foldchange")
+        except ValueError:
+            lfc_index = 1
+
+        if "padj" in header_lower:
+            padj_index = header_lower.index("padj")
+        elif "pvalue" in header_lower:
+            padj_index = header_lower.index("pvalue")
+        else:
+            padj_index = 2
+
         for line in file:
             if line.strip() == "":
                 continue  # Ignorar líneas vacías
-            columns = line.split("\t")
-            if len(columns) < 3:
+            columns = line.strip().split("\t")
+            if len(columns) <= max(0, lfc_index, padj_index):
                 continue  # Ignorar líneas incompletas
             gene_name = columns[0]
             try:
-                log2_fold_change = float(columns[1])
-                p_value = float(columns[2])
-                valid_genes.append((gene_name, log2_fold_change, p_value))
+                log2_fold_change = float(columns[lfc_index])
+                padj = float(columns[padj_index])
+                valid_genes.append((gene_name, log2_fold_change, padj))
             except ValueError:
                 continue  # Ignorar líneas con valores no numéricos
     return valid_genes
 
 
-# Responsabilidad: Cargar los resultados de DESeq2 desde un archivo y devolver una lista de genes válidos con sus estadísticas.
+# Responsabilidad: Cargar los resultados de DESeq2 desde un archivo y devolver una lista de genes válidos con sus estadísticas. Detecta la columna de log2FoldChange y padj a partir del encabezado.
 
 
 def is_significant(log2_fold_change, padj, lfc_threshold, padj_threshold):
@@ -45,12 +60,10 @@ def classify_gene(log2_fold_change):
 
 def filter_genes(results, lfc_threshold, padj_threshold):
     filtered_genes = []
-    for gene_name, log2_fold_change, p_value in results:
-        if is_significant(log2_fold_change, p_value, lfc_threshold, padj_threshold):
+    for gene_name, log2_fold_change, padj in results:
+        if is_significant(log2_fold_change, padj, lfc_threshold, padj_threshold):
             classification = classify_gene(log2_fold_change)
-            filtered_genes.append(
-                (gene_name, log2_fold_change, p_value, classification)
-            )
+            filtered_genes.append((gene_name, log2_fold_change, padj, classification))
     return filtered_genes
 
 
@@ -60,11 +73,11 @@ def filter_genes(results, lfc_threshold, padj_threshold):
 def write_results(output_file, filtered_genes):
     with open(output_file, "w") as file:
         file.write(
-            "Gene\tLog2FoldChange\tPValue\tClassification\n"
+            "Gene\tLog2FoldChange\tpadj\tClassification\n"
         )  # Escribir encabezado
-        for gene_name, log2_fold_change, p_value, classification in filtered_genes:
+        for gene_name, log2_fold_change, padj, classification in filtered_genes:
             file.write(
-                f"{gene_name}\t{log2_fold_change}\t{p_value}\t{classification}\n"
+                f"{gene_name}\t{log2_fold_change}\t{padj}\t{classification}\n"
             )  # Escribir genes filtrados
 
 
