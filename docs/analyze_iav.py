@@ -55,3 +55,17 @@ def filter_genes(results, lfc_threshold, padj_threshold):
 
 
 # Responsabilidad: Filtrar los genes significativos y clasificarlos según su log2 fold change, devolviendo una lista de genes con su clasificación.
+
+
+def write_results(output_file, filtered_genes):
+    with open(output_file, "w") as file:
+        file.write(
+            "Gene\tLog2FoldChange\tPValue\tClassification\n"
+        )  # Escribir encabezado
+        for gene_name, log2_fold_change, p_value, classification in filtered_genes:
+            file.write(
+                f"{gene_name}\t{log2_fold_change}\t{p_value}\t{classification}\n"
+            )  # Escribir genes filtrados
+
+
+# Responsabilidad: Escribir los genes filtrados y clasificados en un archivo de salida con un formato específico.
