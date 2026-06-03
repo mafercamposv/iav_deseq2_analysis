@@ -69,3 +69,46 @@ def write_results(output_file, filtered_genes):
 
 
 # Responsabilidad: Escribir los genes filtrados y clasificados en un archivo de salida con un formato específico.
+
+
+def print_summary(filtered_genes):
+    total_genes = len(filtered_genes)
+    upregulated_genes = sum(1 for gene in filtered_genes if gene[3] == "upregulated")
+    downregulated_genes = sum(
+        1 for gene in filtered_genes if gene[3] == "downregulated"
+    )
+    print(f"Total significant genes: {total_genes}")
+    print(f"Upregulated genes: {upregulated_genes}")
+    print(f"Downregulated genes: {downregulated_genes}")
+
+
+# Responsabilidad: Imprimir un resumen con el conteo de genes significativos y su clasificación.
+
+
+def main():
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Analyze DESeq2 results")
+    parser.add_argument("input_file", help="Path to the DESeq2 results file")
+    parser.add_argument(
+        "output_file", help="Path to the output file for filtered results"
+    )
+    parser.add_argument(
+        "--lfc_threshold", type=float, default=1.0, help="Log2 fold change threshold"
+    )
+    parser.add_argument(
+        "--padj_threshold", type=float, default=0.05, help="Adjusted p-value threshold"
+    )
+    args = parser.parse_args()
+
+    try:
+        results = load_deseq2_results(args.input_file)
+        filtered_genes = filter_genes(results, args.lfc_threshold, args.padj_threshold)
+        write_results(args.output_file, filtered_genes)
+        print_summary(filtered_genes)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+if __name__ == "__main__":
+    main()
