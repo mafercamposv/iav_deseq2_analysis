@@ -28,3 +28,23 @@ IFIT1	5.1	0.00001	upregulated
 En esta primera versión trabajaremos únicamente con la información del archivo DESeq2.
 
 Más adelante exploraremos cómo integrar información adicional de genes usando archivos GFF.
+
+## Requisitos funcionales
+
+1. Leer un archivo TSV con resultados de DESeq2.
+2. Extraer el nombre del gen, log2FoldChange y padj.
+3. Ignorar líneas inválidas o incompletas.
+4. Identificar genes significativos usando padj < 0.05 y abs(log2FoldChange) >= 1.
+5. Clasificar genes como sobreexpresados o subexpresados.
+6. Mostrar un resumen en pantalla.
+7. Guardar los genes filtrados en un archivo de salida.
+
+## Criterios de significancia
+
+Un gen se considerará diferencialmente expresado si cumple:
+
+- padj < 0.05
+- abs(log2FoldChange) >= 1
+
+Si log2FoldChange > 0, el gen se clasificará como sobreexpresado.
+Si log2FoldChange < 0, el gen se clasificará como subexpresado.
